@@ -59,13 +59,17 @@ Player.prototype = {
       opponentIdx = (self._playerIdx + 1) % 2,
       unseenCards = computeUnseenCards(gameState),
       courtValues = gameState.computeCourtValues(),
-      avgUnseenCard = unseenCards.reduce(avgReducer(unseenCards.length)),
+      avgUnseenCard = unseenCards.reduce(avgReducer(unseenCards.length), 0),
       opponentHandSize = unseenCards.length - 4, 
       expectedOpponentHand = opponentHandSize * avgUnseenCard,
       expectedOpponentValue = expectedOpponentHand + courtValues[opponentIdx],
       myHand = gameState._hands[self._playerIdx],
       myValue = gameState.computePlayerValues()[self._playerIdx],
       pileValue = gameState.computePileValue();
+
+    //console.log('unseen cards:', unseenCards);
+    //console.log(avgUnseenCard);
+    //console.log('EOV:', expectedOpponentValue);
 
     if (myValue <= pileValue) {
       if (expectedOpponentValue > pileValue || expectedOpponentValue < myValue) {
@@ -109,7 +113,10 @@ Player.prototype = {
       }
     } else {
       // TODO: better to be over than under, skew
-      return 0 - Math.abs(hypValue - hypPileValue);
+      var myDelta = Math.abs(hypValue - hypPileValue),
+        opponentDelta = Math.abs(hypPileValue - expectedOpponentValue);
+
+      return opponentDelta - myDelta;
     }
   },
   testSelf: function() {

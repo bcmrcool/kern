@@ -91,6 +91,12 @@ Controller.prototype = {
         stateForPlayer = currentState.perspectiveClone(currentPlayer),
         move = playerList[currentPlayer].nextMove(stateForPlayer);
 
+      //console.log(currentState._hands);
+      //console.log(currentState._hands[0].reduce(function(a,b){return a+b;}, 0),
+      //            currentState._hands[1].reduce(function(a,b){return a+b;}, 0));
+      //console.log('pile:', currentState.computePileValue());
+      //console.log(move);
+      //console.log('~~~~~~~~~~~~~~~~~~~');
       currentState = currentState.runMove(move);
     }
 
