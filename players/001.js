@@ -4,6 +4,7 @@ function Player() {
 
 
 Player.prototype = {
+  name: '001',
   startRound: function(idx) {
     this._playerIdx = idx;
   },
