@@ -9,7 +9,7 @@ Player.prototype = {
     this._playerIdx = idx;
   },
   nextMove: function(gameState) {
-    var myValue = gameState.computePlayerValues()[this._playerIdx]+gameState.computeCourtValues()[this._playerIdx],
+    var myValue = gameState.computePlayerValues()[this._playerIdx],
         pileValue = gameState.computePileValue(),
         delta = myValue - pileValue,
         myHand = gameState._hands[this._playerIdx],
@@ -62,7 +62,7 @@ Player.prototype = {
     else if (delta < 1) {
       return {action: 'knock'};
     } else {
-      //myHand.sort();
+      myHand.sort();
       for (var i=myHand.length - 1; i>=0; i--) {
         if (pileValue + (myHand[i] * 2) < myValue) {
           return {action: 'play', rank: myHand[i]};
@@ -120,7 +120,7 @@ function checkCondition(hand, pileValue){
 
 function isWithinDelta(hand,pileValue, delta){
   var isWithin = (pileValue - computeSumMyHand(hand) >=0 && 
-      pileValue - computeSumMyHand(hand) < 2)
+      pileValue - computeSumMyHand(hand) < delta)
   return isWithin;
 }
 
