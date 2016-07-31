@@ -59,8 +59,23 @@ GameOutcome.prototype = {
   }
 }
 
+function extend() {
+  for (var i=1; i<arguments.length; i++) {
+    for (var prop in arguments[i]) {
+      arguments[0][prop] = arguments[i][prop];
+    }
+  }
+
+  return arguments[0];
+}
+
+var defaults = {
+  outputPlayByPlay: false
+}
+
 function Controller(player1, player2, options) {
   this._players = [player1, player2];
+  this._options = extend({}, defaults, options);
 }
 
 Controller.prototype = {
@@ -98,13 +113,45 @@ Controller.prototype = {
     return this.continueRound(currentState, playerOne, playerTwo);
   },
   continueRound: function(currentState, playerOne, playerTwo) {
-    console.log('Starting with hands:', currentState._hands);
-    var playerList = [playerOne, playerTwo];
+    var initialHands = currentState._hands,
+      playerList = [playerOne, playerTwo],
+      i = 0;
 
     while (currentState.continuing) {
       var currentPlayer = currentState.currentPlayer,
         stateForPlayer = currentState.perspectiveClone(currentPlayer),
         move = playerList[currentPlayer].nextMove(stateForPlayer);
+
+      if (this._options.outputPlayByPlay) {
+        var courts = currentState.computeCourts(),
+          values = currentState.computePlayerValues(),
+          pile = currentState.computePile();
+
+        console.log('\n\nTurn ', i, '\n-------');
+        console.log('Pile:', pile, '(' + currentState.computePileValue() + ')');
+        console.log(playerOne.name + '(' + values[0] + ')',
+                    '- Hand:', currentState._hands[0],
+                    '- Court:', courts[0]);
+        console.log(playerTwo.name + '(' + values[1] + ')',
+                    '- Hand:', currentState._hands[1],
+                    '- Court:', courts[1]);
+        var currentPlayerName = playerList[currentPlayer].name,
+          moveDescription;
+        if (move.action === 'play') {
+          moveDescription = currentPlayerName + ' plays a ' + move.rank;
+        } else if (move.action === 'discard') {
+          moveDescription = currentPlayerName + ' discards';
+        } else if (move.action === 'take') {
+          moveDescription = currentPlayerName + ' takes a ' + pile[pile.length-1];
+        } else if (move.action === 'fold') {
+          moveDescription = currentPlayerName + ' folds';
+        } else if (move.action === 'knock') {
+          moveDescription = currentPlayerName + ' knocks';
+        }
+
+        console.log(moveDescription, '\n');
+        i++;
+      }
 
       //console.log(currentState._hands);
       //console.log(currentState._hands[0].reduce(function(a,b){return a+b;}, 0),
@@ -115,7 +162,7 @@ Controller.prototype = {
       currentState = currentState.runMove(move);
     }
 
-    return new RoundOutcome(currentState, playerOne, playerTwo);
+    return new RoundOutcome(currentState, playerOne, playerTwo, initialHands);
   }
 }
 

@@ -11,7 +11,7 @@ var commands = {
         PlayerTwo = require('./players/' + playerTwoName),
         playerOne = new PlayerOne(),
         playerTwo = new PlayerTwo(),
-        controller = new Controller(playerOne, playerTwo),
+        controller = new Controller(playerOne, playerTwo, {outputPlayByPlay: true}),
         outcome = controller.runOneRound(playerOne, playerTwo),
         winner = outcome.getWinner(),
         winnerIdx = (winner===playerOne)?1:2;
