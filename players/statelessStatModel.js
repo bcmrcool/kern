@@ -39,6 +39,12 @@ function computeUnseenCards(state) {
   return possibilities;
 }
 
+function avgReducer(denominator) {
+  return (function(acc,x) {
+    return acc + (x / denominator);
+  });
+}
+
 function Player() {
   this._playerIdx = null;
 };
@@ -49,7 +55,62 @@ Player.prototype = {
     this._playerIdx = idx;
   },
   nextMove: function(gameState) {
-    throw new Error('Not implemented yet');
+    var self = this,
+      opponentIdx = (self._playerIdx + 1) % 2,
+      unseenCards = computeUnseenCards(gameState),
+      courtValues = gameState.computeCourtValues(),
+      avgUnseenCard = unseenCards.reduce(avgReducer(unseenCards.length)),
+      opponentHandSize = unseenCards.length - 4, 
+      expectedOpponentHand = opponentHandSize * avgUnseenCard,
+      expectedOpponentValue = expectedOpponentHand + courtValues[opponentIdx],
+      myHand = gameState._hands[self._playerIdx],
+      myValue = gameState.computePlayerValues()[self._playerIdx],
+      pileValue = gameState.computePileValue();
+
+    if (myValue <= pileValue) {
+      if (expectedOpponentValue > pileValue || expectedOpponentValue < myValue) {
+        return {action: 'knock'};
+      } else {
+        return {action: 'take'};
+      }
+    } else {
+      var ranks = myHand.map(function(rank, i) {
+        return {
+          score: self._rankPlay(gameState, expectedOpponentValue, rank),
+          idx: i
+        };
+      });
+
+      ranks.sort(function(a,b) {
+        return b.score - a.score;
+      });
+
+      //console.log(ranks);
+
+      if (ranks.length === 0 || ranks[0].score === -4242) {
+        return {action: 'fold'};
+      } else {
+        return {action: 'play', rank: myHand[ranks[0].idx]};
+      }
+    }
+  },
+  _rankPlay: function(gameState, expectedOpponentValue, play) {
+    var hypValue = gameState.computePlayerValues()[this._playerIdx] - play,
+      hypPileValue = gameState.computePileValue() + play;
+
+    if (expectedOpponentValue < hypValue) {
+      if (hypValue > hypPileValue) {
+        return -4242;
+      } else if (hypValue < expectedOpponentValue) {
+        // TODO: Heuristic based on opponent variance
+        return -4242;
+      } else {
+        return Math.abs(hypValue - expectedOpponentValue);
+      }
+    } else {
+      // TODO: better to be over than under, skew
+      return 0 - Math.abs(hypValue - hypPileValue);
+    }
   },
   testSelf: function() {
     var rs = new RoundState();
