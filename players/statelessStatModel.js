@@ -79,30 +79,42 @@ Player.prototype = {
       }
     } else {
       var ranks = myHand.map(function(rank, i) {
+        var hypValue = myValue - rank,
+          hypPileValue = pileValue + rank;
+
         return {
-          score: self._rankPlay(gameState, expectedOpponentValue, rank),
-          idx: i
+          action: 'play',
+          rank: rank,
+          score: self._rankHyopthesis(gameState, expectedOpponentValue, 
+                                      hypValue, hypPileValue)
         };
       });
+
+      if (myHand.indexOf(6) !== -1) {
+        ranks.push({
+          action: 'discard',
+          score: self._rankHyopthesis(gameState, expectedOpponentValue, 
+                                      myValue - 6, pileValue)
+        });
+      }
 
       ranks.sort(function(a,b) {
         return b.score - a.score;
       });
 
-      //console.log(ranks);
-
       if (ranks.length === 0 || ranks[0].score === -4242) {
         return {action: 'fold'};
       } else {
-        return {action: 'play', rank: myHand[ranks[0].idx]};
+        return {
+          action: ranks[0].action,
+          rank: ranks[0].rank
+        };
       }
     }
   },
-  _rankPlay: function(gameState, expectedOpponentValue, play) {
-    var hypValue = gameState.computePlayerValues()[this._playerIdx] - play,
-      hypPileValue = gameState.computePileValue() + play;
-
-    if (expectedOpponentValue < hypValue) {
+  _rankHyopthesis: function(gameState, expectedOpponentValue, hypValue,
+                            hypPileValue) {
+    if (expectedOpponentValue < hypPileValue) {
       if (hypValue > hypPileValue) {
         return -4242;
       } else if (hypValue < expectedOpponentValue) {

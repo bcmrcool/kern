@@ -145,16 +145,17 @@ RoundState.prototype = {
       var pile = clone.computePile();
 
       if (pile.length < 1) {
-        throw new Error('Player ' + (currentPlayer + 1) + ' attempted to take '
-                        + 'from the pile when it was empty');
+        throw new Error('Player ' + (clone.currentPlayer + 1) + ' attempted ' +
+                        'to take from the pile when it was empty.');
       }
     } else if (move.action === 'discard') {
+      console.log(clone._hands[clone.currentPlayer]);
       if (clone._hands[clone.currentPlayer].indexOf(6) === -1) {
-        throw new Error('Player ' + (currentPlayer + 1) + ' attempted to '
+        throw new Error('Player ' + (clone.currentPlayer + 1) + ' attempted to '
                         + 'discard when they had no sixes.');
       }
 
-      _removeValue(clone._hands[clone.currentPlayer], move.rank);
+      _removeValue(clone._hands[clone.currentPlayer], 6);
     } else if (move.action === 'knock') {
       clone.continuing = false;
 
