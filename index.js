@@ -70,8 +70,16 @@ var commands = {
                   ' times (' + ~~(wins[1]/N * 100) + '%) and started ' + starts[1] +
                   ' times (' + ~~(starts[1]/N * 100) + '%).');
     }
-  }
+  },
+  testPlayer: {
+    usage: '<player>',
+    run: function(playerName) {
+      var Player = require('./players/' + playerName),
+        player = new Player();
 
+      player.testSelf();
+    }
+  }
 };
 
 function main() {
