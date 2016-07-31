@@ -85,6 +85,23 @@ RoundState.prototype = {
 
     return values;
   },
+  computeCourts: function() {
+    var courts = [[],[]],
+      pile = [];
+
+    for (var i=0; i<this.historyStack.length; i++) {
+      if (this.historyStack[i].action === 'play') {
+        pile.push(this.historyStack[i].rank);
+      } else if (this.historyStack[i].action === 'take') {
+        courts[i % 2].push(pile.pop());
+      }
+    }
+
+    return courts;
+  },
+  computeCourtValues: function() {
+    return this.computeCourts().map(_sum);
+  },
   clone: function() {
     return new RoundState(
       this.historyStack.slice(0),
@@ -117,13 +134,13 @@ RoundState.prototype = {
         throw new Error('Player ' + (currentPlayer + 1) + ' attempted to take '
                         + 'from the pile when it was empty');
       }
-
-      clone._hands[clone.currentPlayer].push(pile(pile.length-1));
     } else if (move.action === 'discard') {
       if (clone._hands[clone.currentPlayer].indexOf(6) === -1) {
         throw new Error('Player ' + (currentPlayer + 1) + ' attempted to '
                         + 'discard when they had no sixes.');
       }
+
+      _removeValue(clone._hands[clone.currentPlayer], move.rank);
     } else if (move.action === 'knock') {
       clone.continuing = false;
 
