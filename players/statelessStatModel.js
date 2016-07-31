@@ -112,11 +112,7 @@ Player.prototype = {
         return Math.abs(hypValue - expectedOpponentValue);
       }
     } else {
-      // TODO: better to be over than under, skew
-      var myDelta = Math.abs(hypValue - hypPileValue),
-        opponentDelta = Math.abs(hypPileValue - expectedOpponentValue);
-
-      return opponentDelta - myDelta;
+      return 0 - Math.abs(hypValue - hypPileValue);
     }
   },
   testSelf: function() {
