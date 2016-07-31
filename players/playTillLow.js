@@ -3,6 +3,7 @@ function Player() {
 };
 
 Player.prototype = {
+  name: 'playTillLow',
   startRound: function(idx) {
     this._playerIdx = idx;
   },

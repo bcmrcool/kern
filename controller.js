@@ -53,6 +53,13 @@ RoundState.prototype = {
     // Returns the index of the player that isn't the current player
     return (this.currentPlayer + 1) % 2;
   },
+  endedInFold: function() {
+    if (this.continuing) {
+      throw Error('Can not determine fold-state before a round is done.');
+    }
+
+    return this.historyStack[this.historyStack.length - 1].action === 'fold';
+  },
   computePile: function() {
     var pile = [];
 
@@ -170,28 +177,84 @@ RoundState.prototype = {
   }
 }
 
+function RoundOutcome(roundState, playerOne, playerTwo) {
+  if (roundState.continuing) {
+    throw new Error('Don\'t construct a RoundOutcome until a game has finished');
+  }
+
+  this.roundState = roundState;
+  this.playerOne = playerOne;
+  this.playerTwo = playerTwo;
+}
+
+RoundOutcome.prototype = {
+  getWinner: function() {
+    if (this.roundState.winner === 0) {
+      return this.playerOne;
+    } else {
+      return this.playerTwo;
+    }
+  }
+}
+
+function GameOutcome(palyers) {
+  this._scores = [0, 0];
+  this._rounds = [];
+  this._players = players;
+}
+
+GameOutcome.prototype = {
+  recordRound: function(roundOutcome) {
+    var winnerIdx = this._players.indexOf(roundOutcome.getWinner());
+
+    this.rounds.push(roundOutcome);
+    if (roundOutcome.endedInFold()) {
+      this._scores[winnerIdx] += 1;
+    } else {
+      this._scores[winnerIdx] += 2;
+    }
+  },
+  continuing: function() {
+    return this.scores.filter(function(x) { return x<6; }).length === 0;
+  }
+}
+
 function Controller(player1, player2, options) {
   this._players = [player1, player2];
 }
 
 Controller.prototype = {
-  runOneRound: function() {
-    var currentState = new RoundState();
+  runOneGame: function() {
+    var outcome = new GameOutcome(this._players),
+      startingPlayerIdx = ~~(Math.random()*2);
 
-    this._players[0].startRound(0);
-    this._players[1].startRound(1);
+    while (outcome.continueing()) {
+      var roundOutcome = this.runOneRound(
+        this._players[startingPlayer],
+        this._players[(startingPlayer + 1) % 2]);
+
+      outcome.recordRound(roundOutcome);
+      startingPlayer = this._players.indexOf(roundOutcome.getWinner());
+    }
+
+    return outcome;
+  },
+  runOneRound: function(playerOne, playerTwo) {
+    var currentState = new RoundState(),
+      playerList = [playerOne, playerTwo];
+
+    playerOne.startRound(0);
+    playerTwo.startRound(1);
 
     while (currentState.continuing) {
       var currentPlayer = currentState.currentPlayer,
         stateForPlayer = currentState.perspectiveClone(currentPlayer),
-        move = this._players[currentPlayer].nextMove(stateForPlayer);
+        move = playerList[currentPlayer].nextMove(stateForPlayer);
 
       currentState = currentState.runMove(move);
     }
 
-    console.log('Player ' + (currentState.winner + 1) + ' has won!');
-    console.log('History: ');
-    console.log(currentState.historyStack);
+    return new RoundOutcome(currentState, playerOne, playerTwo);
   }
 }
 
