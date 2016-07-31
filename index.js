@@ -36,7 +36,42 @@ var commands = {
                   outcome._scores[winnerIdx - 1] + ' to ' +
                   outcome._scores[winnerIdx % 2] + '.');
     }
+  },
+  runNGames: {
+    usage: 'N <player 1> <player 2>',
+    run: function(N, playerOneName, playerTwoName) {
+      var PlayerOne = require('./players/' + playerOneName),
+        PlayerTwo = require('./players/' + playerTwoName),
+        playerOne = new PlayerOne(),
+        playerTwo = new PlayerTwo(),
+        controller = new Controller(playerOne, playerTwo),
+        wins = [0, 0],
+        starts = [0, 0],
+        outcomes = [];
+
+      var singleOutcome, winner, winnerIdx;
+
+      for (var i=0; i<N; i++) {
+        singleOutcome = controller.runOneGame();
+
+        outcomes.push(singleOutcome);
+
+        winner = singleOutcome.getWinner();
+        winnerIdx = (winner===playerOne)?0:1;
+
+        wins[winnerIdx]++;
+        starts[singleOutcome.starter]++;
+      }
+
+      console.log('In ' + N + ' trials ' + playerOne.name + ' (player 1) won ' +
+                  wins[0] + ' times (' + ~~(wins[0]/N * 100) + '%) and ' +
+                  'started ' + starts[0] + ' times (' + ~~(starts[0]/N * 100) +
+                  '%) while ' + playerTwo.name + ' (player 2) won ' + wins[1] +
+                  ' times (' + ~~(wins[1]/N * 100) + '%) and started ' + starts[1] +
+                  ' times (' + ~~(starts[1]/N * 100) + '%).');
+    }
   }
+
 };
 
 function main() {

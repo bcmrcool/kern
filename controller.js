@@ -199,7 +199,8 @@ RoundOutcome.prototype = {
 
 }
 
-function GameOutcome(players) {
+function GameOutcome(players, starter) {
+  this.starter = starter;
   this._scores = [0, 0];
   this._rounds = [];
   this._players = players;
@@ -234,8 +235,8 @@ function Controller(player1, player2, options) {
 
 Controller.prototype = {
   runOneGame: function() {
-    var outcome = new GameOutcome(this._players),
-      startingPlayerIdx = ~~(Math.random()*2);
+    var startingPlayerIdx = ~~(Math.random()*2),
+    outcome = new GameOutcome(this._players, startingPlayerIdx);
 
     while (outcome.continuing()) {
       var roundOutcome = this.runOneRound(
