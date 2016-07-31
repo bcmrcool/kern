@@ -136,8 +136,8 @@ RoundState.prototype = {
 
     if (move.action === 'play') {
       if (!Number.isInteger(move.rank) || move.rank < 1 || move.rank > 6) {
-        throw new Error('Player ' + (currentPlayer + 1) + ' attempted to play '
-                        + 'an invalid value of: ' + move.rank);
+        throw new Error('Player ' + (this.currentPlayer + 1) + ' attempted ' +
+                        'to play an invalid value of: ' + move.rank);
       }
 
       _removeValue(clone._hands[clone.currentPlayer], move.rank);
