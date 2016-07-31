@@ -80,11 +80,26 @@ Controller.prototype = {
     return outcome;
   },
   runOneRound: function(playerOne, playerTwo) {
-    var currentState = new RoundState(),
-      playerList = [playerOne, playerTwo];
+    var currentState = new RoundState();
 
     playerOne.startRound(0);
     playerTwo.startRound(1);
+
+    return this.continueRound(currentState, playerOne, playerTwo);
+  },
+  runRoundWithHands: function(hands, playerOne, playerTwo) {
+    var currentState = new RoundState();
+
+    currentState._hands = hands;
+
+    playerOne.startRound(0);
+    playerTwo.startRound(1);
+
+    return this.continueRound(currentState, playerOne, playerTwo);
+  },
+  continueRound: function(currentState, playerOne, playerTwo) {
+    console.log('Starting with hands:', currentState._hands);
+    var playerList = [playerOne, playerTwo];
 
     while (currentState.continuing) {
       var currentPlayer = currentState.currentPlayer,

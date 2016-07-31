@@ -53,6 +53,20 @@ RoundState.prototype = {
     // Returns the index of the player that isn't the current player
     return (this.currentPlayer + 1) % 2;
   },
+  computeInitialHands: function() {
+    var hands = [this._hands[0].slice(0), this._hands[1].slice(0)];
+
+    for (var i=0; i<this.historyStack.length; i++) {
+      if (this.historyStack[i].action === 'play') {
+        hands[i % 2].push(this.historyStack[i].rank); 
+      } else if (this.historyStack[i].action === 'discard') {
+        hands[i % 2].push(6); 
+      }
+
+    }
+
+    return hands;
+  },
   computePile: function() {
     var pile = [];
 
@@ -74,7 +88,7 @@ RoundState.prototype = {
     var values = this._hands.map(_sum);
     var pile = [];
 
-    for (var i=0; i<this.historyStack; i++) {
+    for (var i=0; i<this.historyStack.length; i++) {
       var move = this.historyStack[i];
       if (move.action === 'play') {
         pile.push(move.rank);
