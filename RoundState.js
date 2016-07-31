@@ -158,6 +158,11 @@ RoundState.prototype = {
           clone.winner = clone._op();
         }
       }
+    } else if (move.action === 'fold') {
+      clone.continuing = false;
+      clone.winner = clone._op();
+    } else {
+      throw Error('Unrecognized action: ' + move.action);
     }
 
     clone.historyStack.push(move);
