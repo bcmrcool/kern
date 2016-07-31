@@ -18,9 +18,14 @@ Player.prototype = {
 
 
       // Step 1: Determine if my Hand and the Enemy Hand is High or Low
-      //console.log("Hand: " + myHand);
+      console.log("Hand: " + myHand);
       myHandRate = computeMyHandRate(myHand);
-      //console.log("My hand is: " + myHandRate);
+      console.log("My hand is: " + myHandRate);
+
+      //Step 2: If hand is low and a six is in the center, then play a 6
+      if (myHandRate == "low" && findOccurrences(myHand,6)>1 && pileValue==6){
+        return {action: 'play', rank: 6};
+      }
 
       // Step 2: Check if condition can be fulfilled
          // 2a: checkEnemyChance of exact
@@ -28,7 +33,7 @@ Player.prototype = {
          //     if  low: knock
       condition = checkCondition(myHand,pileValue);
       if(condition.pass==true){
-        //console.log("ey bruh it passed and the card is " + condition.index);
+        console.log("THe condition was passed at index: " + condition.index);
         //console.log("total hand is " +pileValue);
         if (condition.discard==true){
           return {action: 'discard', rank:6};
@@ -38,17 +43,20 @@ Player.prototype = {
         }
       }
 
-      // Step 3: If more than one 6, discard
+      //Step 3: See if taking a card will help reach the center pile
+
+
+      // Step 4: If more than one 6, discard
       if (findOccurrences(myHand,6)>1){
         return {action: 'discard', rank:6};
       }
 
-      // Step 4: ???
+      // Step 5: ???
 
     else if (delta < 1) {
       return {action: 'knock'};
     } else {
-      //myHand.sort();
+      myHand.sort();
       for (var i=myHand.length - 1; i>=0; i--) {
         if (pileValue + (myHand[i] * 2) < myValue) {
           return {action: 'play', rank: myHand[i]};
@@ -69,7 +77,7 @@ function computeMyHandRate(hand){
   else return "low";
 };
 
-function computerEnemyHandRate(hand, pileValue){
+function computeEnemyHandRate(hand, pileValue){
 
 };
 
@@ -81,13 +89,14 @@ function checkCondition(hand, pileValue){
   condition.pass = null;
   condition.discard = null;
   //console.log(pileValue);
+  // Iterate through the current hand and determine is any of the cards can be used to be close 
+  // to the pile value
+  console.log("Main Pile Value: "+pileValue);
   for(var i = 0; i < hand.length; i++){
-    //console.log("now pile v is "+pileValue);
     tempHand = hand.slice(0);
     cardToMove = tempHand.splice(i,1)[0];
     //If value of the pile added with the card taken out of the current hand is at most one more than hand after, pass
-    if (pileValue+cardToMove - computeSumMyHand(tempHand) >=0 && 
-      pileValue+cardToMove - computeSumMyHand(tempHand) < 2){
+    if (isWithinDelta(tempHand,pileValue+cardToMove,2)){
       condition.index = i;
       condition.pass = true;
       return condition;
@@ -101,6 +110,12 @@ function checkCondition(hand, pileValue){
       return condition;
     }
   return condition;
+}
+
+function isWithinDelta(hand,pileValue, delta){
+  var isWithin = (pileValue - computeSumMyHand(hand) >=0 && 
+      pileValue - computeSumMyHand(hand) < 2)
+  return isWithin;
 }
 
 function computeSumMyHand(hand){
