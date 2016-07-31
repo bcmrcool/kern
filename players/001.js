@@ -9,12 +9,13 @@ Player.prototype = {
     this._playerIdx = idx;
   },
   nextMove: function(gameState) {
-    var myValue = gameState.computePlayerValues()[this._playerIdx],
+    var myValue = gameState.computePlayerValues()[this._playerIdx]+gameState.computeCourtValues()[this._playerIdx],
         pileValue = gameState.computePileValue(),
         delta = myValue - pileValue,
         myHand = gameState._hands[this._playerIdx],
         myHandRate = null,
         enemyHandRate = null,
+        myCourtValue = gameState.computeCourtValues()[this._playerIdx],
         condition;
 
 
@@ -45,19 +46,23 @@ Player.prototype = {
       }
 
       //Step 3: See if taking a card will help reach the center pile
-
+      if((pileValue-myValue)>1){
+        console.log("since pile value is "+pileValue+" and mine is "+myValue+" taking");
+        return {action: 'take'};
+      }
 
       // Step 4: If more than one 6, discard
-      if (findOccurrences(myHand,6)>1){
+      if (findOccurrences(myHand,6)>1 && myValue!==pileValue){
         return {action: 'discard', rank:6};
       }
 
       // Step 5: ???
 
+
     else if (delta < 1) {
       return {action: 'knock'};
     } else {
-      myHand.sort();
+      //myHand.sort();
       for (var i=myHand.length - 1; i>=0; i--) {
         if (pileValue + (myHand[i] * 2) < myValue) {
           return {action: 'play', rank: myHand[i]};
