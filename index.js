@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 
 var Controller = require('./controller');
+var argv = require('yargs').argv;
 
+function divineBaseOptions() {
+  var options = {
+    outputPlayByPlay: !!argv.pbp
+  };
+
+  return options;
+}
 
 var commands = {
   runOneRound: {
@@ -11,7 +19,8 @@ var commands = {
         PlayerTwo = require('./players/' + playerTwoName),
         playerOne = new PlayerOne(),
         playerTwo = new PlayerTwo(),
-        controller = new Controller(playerOne, playerTwo, {outputPlayByPlay: true}),
+        options = divineBaseOptions(),
+        controller = new Controller(playerOne, playerTwo, options),
         outcome = controller.runOneRound(playerOne, playerTwo),
         winner = outcome.getWinner(),
         winnerIdx = (winner===playerOne)?1:2;
@@ -32,7 +41,8 @@ var commands = {
         PlayerTwo = require('./players/' + playerTwoName),
         playerOne = new PlayerOne(),
         playerTwo = new PlayerTwo(),
-        controller = new Controller(playerOne, playerTwo),
+        options = divineBaseOptions(),
+        controller = new Controller(playerOne, playerTwo, options),
         handSeq = handString.split(','),
         cardSeq = [],
         distribution = [0,0,0,0,0,0];
@@ -78,7 +88,8 @@ var commands = {
         PlayerTwo = require('./players/' + playerTwoName),
         playerOne = new PlayerOne(),
         playerTwo = new PlayerTwo(),
-        controller = new Controller(playerOne, playerTwo),
+        options = divineBaseOptions(),
+        controller = new Controller(playerOne, playerTwo, options),
         outcome = controller.runOneGame(),
         winner = outcome.getWinner(),
         winnerIdx = (winner===playerOne)?1:2;
@@ -95,7 +106,8 @@ var commands = {
         PlayerTwo = require('./players/' + playerTwoName),
         playerOne = new PlayerOne(),
         playerTwo = new PlayerTwo(),
-        controller = new Controller(playerOne, playerTwo),
+        options = divineBaseOptions(),
+        controller = new Controller(playerOne, playerTwo, options),
         wins = [0, 0],
         starts = [0, 0],
         outcomes = [];
@@ -147,13 +159,6 @@ function main() {
   }
 
   var subcommand = commands[subcommandName];
-
-  if (subcommand.run.length != process.argv.length - 3) {
-    console.error('Incorrect number of arguments');
-    console.error('Usage: ' + process.argv[1] + ' ' + subcommandName + ' ' +
-                  subcommand.usage);
-    process.exit(1);
-  }
 
   subcommand.run.apply(subcommand, process.argv.slice(3));
 }
