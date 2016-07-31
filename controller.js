@@ -1,6 +1,6 @@
 var RoundState = require('./RoundState');
 
-function RoundOutcome(roundState, playerOne, playerTwo) {
+function RoundOutcome(roundState, playerOne, playerTwo, initialHands) {
   if (roundState.continuing) {
     throw new Error('Don\'t construct a RoundOutcome until a game has finished');
   }
@@ -8,6 +8,7 @@ function RoundOutcome(roundState, playerOne, playerTwo) {
   this.roundState = roundState;
   this.playerOne = playerOne;
   this.playerTwo = playerTwo;
+  this.initialHands = initialHands;
 }
 
 RoundOutcome.prototype = {
@@ -113,7 +114,7 @@ Controller.prototype = {
     return this.continueRound(currentState, playerOne, playerTwo);
   },
   continueRound: function(currentState, playerOne, playerTwo) {
-    var initialHands = currentState._hands,
+    var initialHands = currentState._hands.slice(0,2),
       playerList = [playerOne, playerTwo],
       i = 0;
 

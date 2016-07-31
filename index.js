@@ -16,7 +16,11 @@ var commands = {
         winner = outcome.getWinner(),
         winnerIdx = (winner===playerOne)?1:2;
 
-      console.log('Initial hands where:', outcome.roundState.computeInitialHands());
+      var handString = outcome.initialHands.map(function(x) {
+        return x.join(',')
+      }).join(',');
+
+      console.log('Initial hands where:', handString);
       console.log(winner.name + ' (player ' + winnerIdx + ') has won in ' +
                   outcome.roundState.historyStack.length + ' moves.');
     }
