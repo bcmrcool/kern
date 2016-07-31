@@ -22,7 +22,19 @@ var commands = {
   },
   runOneGame: {
     usage: '<player 1> <player 2>',
-    run: function() {
+    run: function(playerOneName, playerTwoName) {
+      var PlayerOne = require('./players/' + playerOneName),
+        PlayerTwo = require('./players/' + playerTwoName),
+        playerOne = new PlayerOne(),
+        playerTwo = new PlayerTwo(),
+        controller = new Controller(playerOne, playerTwo),
+        outcome = controller.runOneGame(),
+        winner = outcome.getWinner(),
+        winnerIdx = (winner===playerOne)?1:2;
+
+      console.log(winner.name + ' (player ' + winnerIdx + ') has won the game ' +
+                  outcome._scores[winnerIdx - 1] + ' to ' +
+                  outcome._scores[winnerIdx % 2] + '.');
     }
   }
 };

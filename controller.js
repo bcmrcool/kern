@@ -53,13 +53,6 @@ RoundState.prototype = {
     // Returns the index of the player that isn't the current player
     return (this.currentPlayer + 1) % 2;
   },
-  endedInFold: function() {
-    if (this.continuing) {
-      throw Error('Can not determine fold-state before a round is done.');
-    }
-
-    return this.historyStack[this.historyStack.length - 1].action === 'fold';
-  },
   computePile: function() {
     var pile = [];
 
@@ -194,10 +187,19 @@ RoundOutcome.prototype = {
     } else {
       return this.playerTwo;
     }
-  }
+  },
+  endedInFold: function() {
+    if (this.roundState.continuing) {
+      throw Error('Can not determine fold-state before a round is done.');
+    }
+
+    var lastStackIdx = this.roundState.historyStack.length - 1;
+    return this.roundState.historyStack[lastStackIdx].action === 'fold';
+  },
+
 }
 
-function GameOutcome(palyers) {
+function GameOutcome(players) {
   this._scores = [0, 0];
   this._rounds = [];
   this._players = players;
@@ -207,7 +209,7 @@ GameOutcome.prototype = {
   recordRound: function(roundOutcome) {
     var winnerIdx = this._players.indexOf(roundOutcome.getWinner());
 
-    this.rounds.push(roundOutcome);
+    this._rounds.push(roundOutcome);
     if (roundOutcome.endedInFold()) {
       this._scores[winnerIdx] += 1;
     } else {
@@ -215,7 +217,14 @@ GameOutcome.prototype = {
     }
   },
   continuing: function() {
-    return this.scores.filter(function(x) { return x<6; }).length === 0;
+    return this._scores.filter(function(x) { return x>=6; }).length === 0;
+  },
+  getWinner: function() {
+    if (this.continuing()) {
+      throw new Error('Game not finished yet.');
+    }
+
+    return this._players[(this._scores[0]>=6) ? 0 : 1];
   }
 }
 
@@ -228,10 +237,10 @@ Controller.prototype = {
     var outcome = new GameOutcome(this._players),
       startingPlayerIdx = ~~(Math.random()*2);
 
-    while (outcome.continueing()) {
+    while (outcome.continuing()) {
       var roundOutcome = this.runOneRound(
-        this._players[startingPlayer],
-        this._players[(startingPlayer + 1) % 2]);
+        this._players[startingPlayerIdx],
+        this._players[(startingPlayerIdx + 1) % 2]);
 
       outcome.recordRound(roundOutcome);
       startingPlayer = this._players.indexOf(roundOutcome.getWinner());
